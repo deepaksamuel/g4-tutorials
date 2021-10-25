@@ -129,6 +129,22 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                       0,                     //copy number
                       checkOverlaps);        //overlaps checking                    
   
+
+    //Foil2
+  G4Sphere* solidSphere =   new G4Sphere("Sphere", 2*cm, 2.1*cm, 0, 360*degree, 0, 180*degree);    //solid volume
+      
+  G4LogicalVolume* logicSphere =    new G4LogicalVolume(solidSphere, world_mat,  "Sphere");            //logical volume
+
+  //physical volume                                
+  G4VPhysicalVolume* physSphere =   new G4PVPlacement(0,                     //no rotation
+                      G4ThreeVector(0,0,0*cm),       //at (0,0,0)
+                      logicSphere,            //its logical volume
+                      "Sphere",               //its name
+                      logicWorld,                     //its mother  volume
+                      false,                 //no boolean operation
+                      0,                     //copy number
+                      checkOverlaps);        //overlaps checking         
+
   fScoringVolume = logicFoil2;
 
   //  
