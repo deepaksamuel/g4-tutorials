@@ -23,61 +23,69 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: B1SteppingAction.cc 74483 2013-10-09 13:37:06Z gcosmo $
+// $Id: B1PrimaryGeneratorAction.cc 94307 2015-11-11 13:42:46Z gcosmo $
 //
-/// \file B1SteppingAction.cc
-/// \brief Implementation of the B1SteppingAction class
+/// \file B1PrimaryGeneratorAction.cc
+/// \brief Implementation of the B1PrimaryGeneratorAction class
 
-#include "B1SteppingAction.hh"
-#include "B1EventAction.hh"
-#include "B1DetectorConstruction.hh"
+#include "B1PrimaryGeneratorAction.hh"
 
-#include "G4Step.hh"
-#include "G4Event.hh"
-#include "G4RunManager.hh"
+#include "G4LogicalVolumeStore.hh"
 #include "G4LogicalVolume.hh"
-#include "g4csv.hh"
+#include "G4Box.hh"
+#include "G4RunManager.hh"
+#include "G4ParticleGun.hh"
+#include "G4ParticleTable.hh"
+#include "G4ParticleDefinition.hh"
+#include "G4SystemOfUnits.hh"
+#include "Randomize.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1SteppingAction::B1SteppingAction(B1EventAction* eventAction)
-: G4UserSteppingAction(),
-  fEventAction(eventAction),
-  fScoringVolume(0)
-{}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-B1SteppingAction::~B1SteppingAction()
-{}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void B1SteppingAction::UserSteppingAction(const G4Step* step)
+B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
+: G4VUserPrimaryGeneratorAction(),
+  fParticleGun(0), 
+  fEnvelopeBox(0)
 {
-  if (!fScoringVolume) { 
-    const B1DetectorConstruction* detectorConstruction
-      = static_cast<const B1DetectorConstruction*>
-        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-    fScoringVolume = detectorConstruction->GetScoringVolume();   
-  }
-  if(step->GetPreStepPoint()->GetPhysicalVolume()->GetName()=="Sphere")
-  {
-    G4AnalysisManager *man = G4AnalysisManager::Instance();
+  G4int n_particle = 1;
+  fParticleGun  = new G4ParticleGun(n_particle);
 
-    //G4cout<<step->GetPreStepPoint()->GetPosition().x()<<step->GetPreStepPoint()->GetPosition().y()<<step->GetPreStepPoint()->GetPosition().z()<<G4endl;
+  // default particle kinematic
+  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+  G4String particleName;
+  G4ParticleDefinition* particle
+    = particleTable->FindParticle(particleName="alpha");
+  fParticleGun->SetParticleDefinition(particle);
+  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
+  fParticleGun->SetParticleEnergy(6.*MeV);
+}
 
-    man->FillNtupleDColumn(0, step->GetPreStepPoint()->GetPosition().x());
-    man->FillNtupleDColumn(1, step->GetPreStepPoint()->GetPosition().y());
-    man->FillNtupleDColumn(2, step->GetPreStepPoint()->GetPosition().z());
-    man->FillNtupleDColumn(3, step->GetTrack()->GetDefinition()->GetPDGEncoding());
-    
-    
-    man->AddNtupleRow(); 
-  }
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+B1PrimaryGeneratorAction::~B1PrimaryGeneratorAction()
+{
+  delete fParticleGun;
+}
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void B1PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
+{
+  //this function is called at the begining of ecah event
+  //
+
+  // In order to avoid dependence of PrimaryGeneratorAction
+  // on DetectorConstruction class we get Envelope volume
+  // from G4LogicalVolumeStore.
+
+  G4double size = 0.8; 
+  G4double x0 = 0;
+  G4double y0 = 0;
+  G4double z0 = 0;
+  
+  fParticleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
+
+  fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

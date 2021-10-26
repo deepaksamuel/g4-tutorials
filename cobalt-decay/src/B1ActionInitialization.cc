@@ -23,62 +23,49 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: B1SteppingAction.cc 74483 2013-10-09 13:37:06Z gcosmo $
+// $Id: B1ActionInitialization.cc 68058 2013-03-13 14:47:43Z gcosmo $
 //
-/// \file B1SteppingAction.cc
-/// \brief Implementation of the B1SteppingAction class
+/// \file B1ActionInitialization.cc
+/// \brief Implementation of the B1ActionInitialization class
 
-#include "B1SteppingAction.hh"
+#include "B1ActionInitialization.hh"
+#include "B1PrimaryGeneratorAction.hh"
+#include "B1RunAction.hh"
 #include "B1EventAction.hh"
-#include "B1DetectorConstruction.hh"
-
-#include "G4Step.hh"
-#include "G4Event.hh"
-#include "G4RunManager.hh"
-#include "G4LogicalVolume.hh"
-#include "g4csv.hh"
+#include "B1SteppingAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1SteppingAction::B1SteppingAction(B1EventAction* eventAction)
-: G4UserSteppingAction(),
-  fEventAction(eventAction),
-  fScoringVolume(0)
+B1ActionInitialization::B1ActionInitialization()
+ : G4VUserActionInitialization()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1SteppingAction::~B1SteppingAction()
+B1ActionInitialization::~B1ActionInitialization()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void B1SteppingAction::UserSteppingAction(const G4Step* step)
+void B1ActionInitialization::BuildForMaster() const
 {
-  if (!fScoringVolume) { 
-    const B1DetectorConstruction* detectorConstruction
-      = static_cast<const B1DetectorConstruction*>
-        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-    fScoringVolume = detectorConstruction->GetScoringVolume();   
-  }
-  if(step->GetPreStepPoint()->GetPhysicalVolume()->GetName()=="Sphere")
-  {
-    G4AnalysisManager *man = G4AnalysisManager::Instance();
-
-    //G4cout<<step->GetPreStepPoint()->GetPosition().x()<<step->GetPreStepPoint()->GetPosition().y()<<step->GetPreStepPoint()->GetPosition().z()<<G4endl;
-
-    man->FillNtupleDColumn(0, step->GetPreStepPoint()->GetPosition().x());
-    man->FillNtupleDColumn(1, step->GetPreStepPoint()->GetPosition().y());
-    man->FillNtupleDColumn(2, step->GetPreStepPoint()->GetPosition().z());
-    man->FillNtupleDColumn(3, step->GetTrack()->GetDefinition()->GetPDGEncoding());
-    
-    
-    man->AddNtupleRow(); 
-  }
-
-
-
+  B1RunAction* runAction = new B1RunAction;
+  SetUserAction(runAction);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void B1ActionInitialization::Build() const
+{
+  SetUserAction(new B1PrimaryGeneratorAction);
+
+  B1RunAction* runAction = new B1RunAction;
+  SetUserAction(runAction);
+  
+  B1EventAction* eventAction = new B1EventAction(runAction);
+  SetUserAction(eventAction);
+  
+  SetUserAction(new B1SteppingAction(eventAction));
+}  
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -23,62 +23,31 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: B1SteppingAction.cc 74483 2013-10-09 13:37:06Z gcosmo $
+/// \file PhysicsList_RadDecay.hh
+/// \brief Definition of the PhysicsList_RadDecay class
 //
-/// \file B1SteppingAction.cc
-/// \brief Implementation of the B1SteppingAction class
+// $Id: PhysicsList_RadDecay.hh 66587 2012-12-21 11:06:44Z ihrivnac $
+//
 
-#include "B1SteppingAction.hh"
-#include "B1EventAction.hh"
-#include "B1DetectorConstruction.hh"
+#ifndef PhysicsList_RadDecay_h
+#define PhysicsList_RadDecay_h 1
 
-#include "G4Step.hh"
-#include "G4Event.hh"
-#include "G4RunManager.hh"
-#include "G4LogicalVolume.hh"
-#include "g4csv.hh"
+#include "G4VModularPhysicsList.hh"
+#include "globals.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1SteppingAction::B1SteppingAction(B1EventAction* eventAction)
-: G4UserSteppingAction(),
-  fEventAction(eventAction),
-  fScoringVolume(0)
-{}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-B1SteppingAction::~B1SteppingAction()
-{}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void B1SteppingAction::UserSteppingAction(const G4Step* step)
+class PhysicsList_RadDecay: public G4VModularPhysicsList
 {
-  if (!fScoringVolume) { 
-    const B1DetectorConstruction* detectorConstruction
-      = static_cast<const B1DetectorConstruction*>
-        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-    fScoringVolume = detectorConstruction->GetScoringVolume();   
-  }
-  if(step->GetPreStepPoint()->GetPhysicalVolume()->GetName()=="Sphere")
-  {
-    G4AnalysisManager *man = G4AnalysisManager::Instance();
+public:
+  PhysicsList_RadDecay();
+ ~PhysicsList_RadDecay();
 
-    //G4cout<<step->GetPreStepPoint()->GetPosition().x()<<step->GetPreStepPoint()->GetPosition().y()<<step->GetPreStepPoint()->GetPosition().z()<<G4endl;
-
-    man->FillNtupleDColumn(0, step->GetPreStepPoint()->GetPosition().x());
-    man->FillNtupleDColumn(1, step->GetPreStepPoint()->GetPosition().y());
-    man->FillNtupleDColumn(2, step->GetPreStepPoint()->GetPosition().z());
-    man->FillNtupleDColumn(3, step->GetTrack()->GetDefinition()->GetPDGEncoding());
-    
-    
-    man->AddNtupleRow(); 
-  }
-
-
-
-}
+public:
+  virtual void ConstructParticle();
+  virtual void SetCuts();
+};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+#endif
