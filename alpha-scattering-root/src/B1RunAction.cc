@@ -41,7 +41,7 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 //#include "G4CsvAnalysisManager.hh"
-#include "g4csv.hh"
+#include "g4root.hh"
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1RunAction::B1RunAction()
@@ -83,8 +83,8 @@ void B1RunAction::BeginOfRunAction(const G4Run*)
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Reset();
   G4AnalysisManager *man = G4AnalysisManager::Instance();
-  
-  man->OpenFile("output.csv");
+  man->SetNtupleMerging(true); // very important 
+  man->OpenFile("output.root");
   // Creation of ntuple
   man->CreateNtuple("events","scattering data");
   
