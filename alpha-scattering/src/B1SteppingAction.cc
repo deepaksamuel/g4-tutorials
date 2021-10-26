@@ -36,6 +36,7 @@
 #include "G4Event.hh"
 #include "G4RunManager.hh"
 #include "G4LogicalVolume.hh"
+#include "g4csv.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -54,15 +55,25 @@ B1SteppingAction::~B1SteppingAction()
 
 void B1SteppingAction::UserSteppingAction(const G4Step* step)
 {
-  if (!fScoringVolume) { 
-    const B1DetectorConstruction* detectorConstruction
-      = static_cast<const B1DetectorConstruction*>
-        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-    fScoringVolume = detectorConstruction->GetScoringVolume();   
-  }
-  if(fScoringVolume->GetName()=="Foil2")
-  {
-    G4cout<<step->GetPreStepPoint()->GetPosition().x()<<step->GetPreStepPoint()->GetPosition().y()<<step->GetPreStepPoint()->GetPosition().z()<<G4endl;
+  // if (!fScoringVolume) { 
+  //   const B1DetectorConstruction* detectorConstruction
+  //     = static_cast<const B1DetectorConstruction*>
+  //       (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+  //   fScoringVolume = detectorConstruction->GetScoringVolume();   
+  // }
+  // if(step->GetPreStepPoint()->GetPhysicalVolume()->GetName()=="Sphere")
+  // {
+  //   G4AnalysisManager *man = G4AnalysisManager::Instance();
+
+  //   //G4cout<<step->GetPreStepPoint()->GetPosition().x()<<step->GetPreStepPoint()->GetPosition().y()<<step->GetPreStepPoint()->GetPosition().z()<<G4endl;
+
+  //   man->FillNtupleDColumn(0, step->GetPreStepPoint()->GetPosition().x());
+  //   man->FillNtupleDColumn(1, step->GetPreStepPoint()->GetPosition().y());
+  //   man->FillNtupleDColumn(2, step->GetPreStepPoint()->GetPosition().z());
+  //   man->FillNtupleDColumn(3, step->GetTrack()->GetDefinition()->GetPDGEncoding());
+    
+    
+  //   man->AddNtupleRow(); 
   }
 
 
